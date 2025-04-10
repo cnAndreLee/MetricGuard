@@ -28,7 +28,10 @@ echo "yes_flag=$yes_flag"
 # 报警日志记录，根据此文件查询历史报警，判断发送逻辑
 ALERT_LOG="./logs/alerts.log"
 #配置文件，配置本机名称、需要检测的端口及短信接口地址
-source ./mg_client.rc
+
+set -e
+source ../private/mg_client.rc
+set +e
 
 echo "本机名称:$CMI_HOST"
 echo "服务端口:$CMI_PORTS"
@@ -148,7 +151,7 @@ function disk_fs_rwstat {
     local fs=`df /home | tail -n 1 | awk '{print $1}'`
     local stat=$(grep $fs /proc/mounts | awk '{print $4}' | cut -f 1 -d ,)
 
-    metric_deal "disk_fs_rwstat" "/home读写状态" "$stat" "null" "$1" "$2" "$3"
+    metric_deal "disk_fs_rwstat" "/home读写状态" "$stat" "" "$1" "$2" "$3"
 }
 
 function disk_inode_usage {

@@ -27,7 +27,7 @@ func main() {
 
 	// smn
 	// hwc.ListSubscriptions()
-	// hwc.AddSubscription("+8615596099788", "李帅", "5")
+	// hwc.AddSubscription("+8618706823013", "杨添凤", "5")
 	// hwc.ListTopicDetails("urn:smn:cn-north-4:3fb032df961740068fbc86c7e6f1058d:app_test_demo")
 	// hwc.CreateTopic("jsz_alert_5", "应用五级告警", "0")
 

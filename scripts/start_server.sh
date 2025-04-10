@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-source ./mg_server.rc
+source ../private/mg_server.rc
 
 # 获取并标准化架构信息
 ARCH=$(uname -m | tr '[:upper:]' '[:lower:]')
