@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cnAndreLee/MetricGuard/hwc"
 	"github.com/cnAndreLee/MetricGuard/model"
@@ -13,7 +14,6 @@ import (
 
 func Alert(c *gin.Context) {
 
-	// 接收客户端DTO
 	var request model.AltreRequest
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -47,7 +47,7 @@ func Alert(c *gin.Context) {
 	} else if request.Type == "4" {
 		levelString = "四级告警"
 	} else if request.Type == "0" {
-		levelString = "告警恢复"
+		levelString = "恢复"
 	} else {
 		res := response.ResponseStruct{
 			HttpStatus: http.StatusOK,
@@ -60,17 +60,26 @@ func Alert(c *gin.Context) {
 		return
 	}
 
-	msg = fmt.Sprintf("[%v]\n主机:%v\nIP:%v\n%v(%v):%v",
-		levelString,
-		request.Host,
-		request.Ip,
-		request.MetricCnName,
-		request.MetricUnit,
-		request.MetricValue,
-	)
-
-	// fmt.Println(request)
-	// fmt.Println(msg)
+	if request.MetricUnit == "" || request.MetricUnit == "1" {
+		msg = fmt.Sprintf("[%v]\n时间:%v\n主机:%v\nIP:%v\n%v:%v",
+			levelString,
+			time.Now().Format("2006-01-02 15:04:05"),
+			request.Host,
+			request.Ip,
+			request.MetricCnName,
+			request.MetricValue,
+		)
+	} else {
+		msg = fmt.Sprintf("[%v]\n时间:%v\n主机:%v\nIP:%v\n%v(%v):%v",
+			levelString,
+			time.Now().Format("2006-01-02 15:04:05"),
+			request.Host,
+			request.Ip,
+			request.MetricCnName,
+			request.MetricUnit,
+			request.MetricValue,
+		)
+	}
 
 	if request.Type == "5" {
 		err = hwc.PublishMessage(msg, "5")
