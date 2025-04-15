@@ -25,6 +25,16 @@ if [[ -e ~/shell/mg-release/mg_client.rc ]];then
     bash ~/shell/mg-release/stop_server.sh
     sleep 2
     cp ~/shell/mg-release/mg_client.rc /tmp/mg_client.rc.bak
+    sed -i 's/127.0.0.1:2999/localhost/g' /tmp//mg_client.rc.bak
+    rm -rf ~/shell/mg-release
+fi
+
+if [[ -e ~/shell/client/mg_client.rc ]];then
+    update=1
+    bash ~/shell/mg-release/client/stop_client.sh
+    bash ~/shell/mg-release/server/stop_server.sh
+    sleep 2
+    cp ~/shell/mg-release/client/mg_client.rc /tmp/mg_client.rc.bak
     rm -rf ~/shell/mg-release
 fi
 
@@ -35,7 +45,6 @@ cd ~/shell/mg-release
 
 if [[ "$update" -eq 1 ]];then
     mv /tmp/mg_client.rc.bak ./private/mg_client.rc
-    sed -i 's/127.0.0.1:2999/localhost/g' ./private/mg_client.rc
     bash ~/shell/mg-release/server/start_server.sh
     bash ~/shell/mg-release/client/start_client.sh
     echo "已完成更新"
