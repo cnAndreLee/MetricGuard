@@ -199,8 +199,8 @@ function disk_io {
         avg_wuse=0
     fi
 
-    metric_deal "disk_io_r" "读操作平均耗时" "$avg_ruse" "%" "$1" "$2" "$3"
-    metric_deal "disk_io_w" "写操作平均耗时" "$avg_wuse" "%" "$1" "$2" "$3"
+    metric_deal "disk_io_r" "读操作平均耗时" "$avg_ruse" "ms" "$1" "$2" "$3"
+    metric_deal "disk_io_w" "写操作平均耗时" "$avg_wuse" "ms" "$1" "$2" "$3"
 }
 
 function net_drop_rate {
@@ -292,7 +292,15 @@ function net_tcp_retrans_rate {
 
 function time_offset {
 
-    local offset=$(chronyc tracking | grep "System" | awk '{print $4}')
+    local offset=""
+	if chronyc tracking > /dev/null 2>&1 ;then 
+	    offset=$(chronyc tracking | grep "System" | awk '{print $4}')
+	elif ntpq -pn > /dev/null 2>&1 ;then
+	    # offset=$(ntpq -pn | awk '/^\*/ {print $9}')
+        offset=$(ntpq -pn | awk '/^\*/ {offset=$9; print (offset < 0) ? -offset : offset}')
+	else
+	    offset="null"
+	fi
 
     metric_deal "time_offset" "时间偏移量" "$offset" "seconds" "$1" "$2" "$3"
 }

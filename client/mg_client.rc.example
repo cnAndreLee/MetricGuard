@@ -1,4 +1,4 @@
-export CMI_SERVER_ENDPOINT="http://127.0.0.1:2999/api/v1/smn/alert"
+export CMI_SERVER_ENDPOINT="http://localhost/api/v1/smn/alert"
 export CMI_HOST=""
 # 使用空格分隔端口
 export CMI_PORTS="2999 80"
