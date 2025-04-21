@@ -293,14 +293,15 @@ function net_tcp_retrans_rate {
 function time_offset {
 
     local offset=""
-	if chronyc tracking > /dev/null 2>&1 ;then 
-	    offset=$(chronyc tracking | grep "System" | awk '{print $4}')
-	elif ntpq -pn > /dev/null 2>&1 ;then
-	    # offset=$(ntpq -pn | awk '/^\*/ {print $9}')
+    if chronyc tracking > /dev/null 2>&1 ;then 
+        offset=$(chronyc tracking | grep "System" | awk '{print $4}')
+    elif ntpq -pn > /dev/null 2>&1 ;then
+        # offset=$(ntpq -pn | awk '/^\*/ {print $9}')
         offset=$(ntpq -pn | awk '/^\*/ {offset=$9; print (offset < 0) ? -offset : offset}')
-	else
-	    offset="null"
-	fi
+    else
+        echo "ERROR: 时间偏移量time_offset获取失败"
+        return 1
+    fi
 
     metric_deal "time_offset" "时间偏移量" "$offset" "seconds" "$1" "$2" "$3"
 }
@@ -449,13 +450,6 @@ function metric_deal {
     EchoDebug "needSend is $needSend , AlertType is $AlertType  $metricName"
 
     if [[ "$needSend" = "Y" ]];then
-        # local metricName=$1
-        # local metricCnName=$2
-        # local metricValue=$3
-        # local metricUnit=$4
-        # local operator=$5
-        # local threshold5=$6
-        # local threshold4=$7
 
         local curlResult=0
         # 还需加入上一次报警类型
