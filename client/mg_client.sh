@@ -30,7 +30,7 @@ ALERT_LOG="./logs/alerts.log"
 #配置文件，配置本机名称、需要检测的端口及短信接口地址
 
 set -e
-source ../private/mg_client.rc
+source ./mg_client.rc
 set +e
 
 echo "本机名称:$CMI_HOST"
@@ -134,11 +134,7 @@ function descriptors_limit {
 
 function disk_used {
  
-    # local disk_use=`df -k /home | tail -n 1 | awk '{print $5}' | sed 's/%$//' `
-
-    # metric_deal "disk_used" "/home挂载点使用率" "$disk_use" "%" "$1" "$2" "$3"
-
-    df | grep mapper | while read -r line; do
+        df | grep mapper | while read -r line; do
         local mountPoint=$(echo $line | awk '{print $6}')
         local value=$(echo $line | awk '{print $5}' | sed 's/%$//')
         metric_deal "mount_point_${mountPoint}_used" "'${mountPoint}'挂载点空间使用率" "$value" "%" "$1" "$2" "$3"
@@ -156,10 +152,6 @@ function disk_fs_rwstat {
 
 function disk_inode_usage {
 
-    # local inode_use=`df -i /home | tail -n 1 | awk '{print $5}' | sed 's/%$//' `
-
-    # metric_deal "disk_inode_usage" "/home_INode使用率" "$inode_use" "%" "$1" "$2" "$3"
-
     df -i | grep mapper | while read -r line; do
         local mountPoint=$(echo $line | awk '{print $6}')
         local value=$(echo $line | awk '{print $5}' | sed 's/%$//')
@@ -173,13 +165,17 @@ function disk_io {
     fs_real_withpath=$(ls -l $fs | awk '{print $11}')
     fs_real=$(basename $fs_real_withpath)
     
-    #第一次读取
+    #第一次读取,/proc/diskstats
     read major minor name rio rmerge rsect ruse wio wmerge wsect wuse running use aveq < <(grep $fs_real /proc/diskstats | head -n 1)
     prev_rio=$rio
     prev_ruse=$ruse
     prev_wio=$wio
     prev_wuse=$wuse
 
+    # 等待一秒
+    sleep 1
+
+    # 第二次读取/proc/diskstats
     read major minor name rio rmerge rsect ruse wio wmerge wsect wuse running use aveq < <(grep $fs_real /proc/diskstats | head -n 1)
     rio_diff=$((rio - prev_rio))
     ruse_diff=$((ruse - prev_ruse))
@@ -335,8 +331,6 @@ function EchoDebug {
     fi
 }
 
-# 数据格式
-# $current_time#$metric#$AlertType#$message#$curlResult
 # 收集并处理指标信息
 function metric_deal {
     local metricName=$1
@@ -466,16 +460,16 @@ cpu_usage '>=' 90 80 &
 cpu_load_avg1 '>=' 0.9 0.7 &
 mem_usage '>=' 90 80 &
 total_open_files '>=' 60000 30000 &
-descriptors_limit '<=' 1000 60000 &
+descriptors_limit '<=' 30000 60000 &
 disk_used '>=' 90 80 &
 disk_fs_rwstat '!=' "rw" "rw" &
 disk_inode_usage '>=' 90 80 &
-disk_io '>=' 7 5 &
-net_drop_rate '>=' 7 5 &
+disk_io '>=' 16 8 &
+net_drop_rate '>=' 20 10 &
 net_tcp_time_wait '>=' 1000 500 &
 net_tcp_close_wait '>=' 30 20 &
 net_tcp_retrans_rate '>=' 20 10 &
-time_offset '>=' 1 0.5 &
+time_offset '>=' 2 1 &
 check_port '!=' "UP" "UP" &
 
 wait
