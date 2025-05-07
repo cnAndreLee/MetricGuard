@@ -342,6 +342,7 @@ function metric_deal {
     local threshold4=$7
 
     local current_time=$(date +"%Y%m%d%H%M%S")  # 当前时间
+    local current_unix_time=$(date -d "$(echo $current_time | sed -r 's/([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3 \4:\5:\6/')" "+%s")
 
     # 打印检测结果
     if [[ "$metricUnit" = "" ]];then
@@ -394,9 +395,10 @@ function metric_deal {
         if [ $(grep $metricName $ALERT_LOG | tail -n 1 | wc -l) -eq "1" ];then 
             EchoDebug "存在指标记录$metricName"
             last_alert_time=$(grep $metricName $ALERT_LOG | tail -n 1 | cut -f1 -d#)
+            last_alert_unix_time=$(date -d "$(echo $last_alert_time | sed -r 's/([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3 \4:\5:\6/')" "+%s")
             last_alert_type=$(grep $metricName $ALERT_LOG | tail -n 1 | cut -f3 -d#)
-            local time_diff=$((current_time - last_alert_time))
-            if ((time_diff < 1000000)); then  # 24 小时
+            local time_diff=$((current_unix_time - last_alert_unix_time))
+            if ((time_diff < 86400)); then  # 24 小时
                 EchoDebug "记录时间小于24小时$metricName"
                 if [[ "$last_alert_type" = "$AlertType" ]];then
                     EchoDebug "alerttype相同,and in 24hours,needSend=N  $metricName"
