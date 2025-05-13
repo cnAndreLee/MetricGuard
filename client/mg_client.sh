@@ -134,7 +134,7 @@ function descriptors_limit {
 
 function disk_used {
  
-        df | grep mapper | while read -r line; do
+    df | grep mapper | while read -r line; do
         local mountPoint=$(echo $line | awk '{print $6}')
         local value=$(echo $line | awk '{print $5}' | sed 's/%$//')
         metric_deal "mount_point_${mountPoint}_used" "'${mountPoint}'挂载点空间使用率" "$value" "%" "$1" "$2" "$3"
@@ -162,7 +162,7 @@ function disk_inode_usage {
 function disk_io {
 
     fs=`df /home | tail -n 1 | awk '{print $1}'`
-    fs_real_withpath=$(ls -l $fs | awk '{print $11}')
+    fs_real_withpath=$(readlink $fs)
     fs_real=$(basename $fs_real_withpath)
     
     #第一次读取,/proc/diskstats
